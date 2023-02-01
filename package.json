@@ -1,0 +1,20 @@
+{
+  "name": "three-little-prince",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite & npm run sass",
+    "build": "vite build",
+    "preview": "vite preview",
+    "sass": "sass --watch src/scss/style.scss:src/css/style.css"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0",
+    "vite-plugin-glsl": "^1.1.2"
+  },
+  "dependencies": {
+    "gsap": "^3.11.4",
+    "three": "^0.149.0"
+  }
+}
