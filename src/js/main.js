@@ -194,7 +194,7 @@ const App = function () {
     const geometry = new THREE.BufferGeometry();
     const textureSize = nearestPowerOfTwoCeil(Math.sqrt(numMaxParticles));
     const textureArraySize = textureSize * textureSize * 4;
-    const colorInside = new THREE.Color('#8cd9ff');
+    const colorInside = new THREE.Color('#a6afc8');
     const colorOutside = new THREE.Color('#1b3984');
 
     // positions & colors
@@ -219,14 +219,15 @@ const App = function () {
 
       // colors
       const colors = new Float32Array(textureArraySize);
-      for (let values = info.colorsArray, i = 0; i < info.positionsArray.length; i += 3) {
+      for (let values = info.colorsArray, i = 0; i < info.positionsArray.length; i += 4) {
         const radius = Math.random() * 5;
         const mixedColor = colorInside.clone();
         mixedColor.lerp(colorOutside, radius / 5);
 
-        colors[i] = mixedColor.r;
-        colors[i + 1] = mixedColor.g;
-        colors[i + 2] = mixedColor.b;
+        colors[i] = mixedColor.r || 0;
+        colors[i + 1] = mixedColor.g || 0;
+        colors[i + 2] = mixedColor.b || 0;
+        colors[i + 3] = 1;
       }
 
       const shuffledAttributes = [positions, colors];

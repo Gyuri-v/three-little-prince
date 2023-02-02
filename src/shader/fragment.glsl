@@ -3,6 +3,7 @@ uniform sampler2D u_pointTexture;
 varying vec4 v_color;
 
 void main() {
+
   // 1. 텍스쳐로 불러오기
   // gl_FragColor = v_color * texture2D(u_pointTexture, gl_PointCoord);
 
