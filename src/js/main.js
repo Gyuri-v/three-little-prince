@@ -48,7 +48,7 @@ const App = function () {
     $container.appendChild($canvas);
 
     // Camera
-    camera = new THREE.PerspectiveCamera(70, ww / wh, 1, 999);
+    camera = new THREE.PerspectiveCamera(24, ww / wh, 1, 999);
     camera.position.set(0, 0, 50);
     scene.add(camera);
 
@@ -99,44 +99,44 @@ const App = function () {
       {
         name: 'chibiprince',
         setting: (geometry) => {
-          geometry.scale(0.4, 0.4, 0.4);
+          geometry.scale(0.2, 0.2, 0.2);
           geometry.rotateX(-0.6);
         },
       },
       {
         name: 'airplanprince',
         setting: (geometry) => {
-          geometry.scale(0.7, 0.7, 0.7);
-          geometry.translate(-10, 10, 0);
+          geometry.scale(0.4, 0.4, 0.4);
+          geometry.translate(-4, 3, 0);
         },
       },
       {
         name: 'rose',
         setting: (geometry) => {
-          geometry.scale(0.35, 0.35, 0.35);
-          geometry.translate(0, -2, 0);
+          geometry.scale(0.2, 0.2, 0.2);
+          geometry.translate(0, -1, 0);
         },
       },
       {
         name: 'boasnake',
         setting: (geometry) => {
           geometry.rotateY(-0.9);
-          geometry.scale(0.7, 0.7, 0.7);
-          geometry.translate(2, -10, 0);
+          geometry.scale(0.45, 0.45, 0.45);
+          geometry.translate(2, -5, 0);
         },
       },
       {
         name: 'escenaRey',
+        counts: 5,
         setting: (geometry) => {
-          geometry.scale(1.5, 1.5, 1.5);
-          geometry.translate(0, -10, 0);
+          geometry.translate(0, -6, 0);
         },
       },
       {
         name: 'withfox',
         setting: (geometry) => {
-          geometry.scale(0.6, 0.6, 0.6);
-          // geometry.translate(0, -10, 0);
+          geometry.scale(0.4, 0.4, 0.4);
+          geometry.translate(0, 1, 0);
         },
       },
     ];
@@ -179,8 +179,11 @@ const App = function () {
         u_colors2: { value: null },
         u_transition: { value: 0 },
         u_time: { value: 0 },
-        u_mouse: { value: new THREE.Vector3(0, 0, 0) },
-        u_mouseRadius: { value: 1.5 },
+        u_pointer: { value: new THREE.Vector3(-999, -999, -999) },
+        u_pointerRadius: { value: 1.5 },
+        u_pointerArea: { value: 0.08 },
+        u_pointerFrequency: { value: 0 },
+        u_pointerScale: { value: 1 },
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
@@ -303,13 +306,13 @@ const App = function () {
     let particleInnerTween;
 
     if (DEBUG) {
-      mouseSphere = new THREE.Mesh(new THREE.SphereGeometry(pointMaterial.uniforms.u_mouseRadius.value, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true }));
+      mouseSphere = new THREE.Mesh(new THREE.SphereGeometry(pointMaterial.uniforms.u_pointerRadius.value, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true }));
       scene.add(mouseSphere);
 
       followMouseSphere = function () {
-        mouseSphere.position.copy(pointMaterial.uniforms.u_mouse.value);
+        mouseSphere.position.copy(pointMaterial.uniforms.u_pointer.value);
         mouseSphere.scale.set(1, 1, 1);
-        mouseSphere.scale.multiplyScalar(pointMaterial.uniforms.u_mouseRadius.value);
+        mouseSphere.scale.multiplyScalar(pointMaterial.uniforms.u_pointerRadius.value);
         render();
       };
     }
@@ -318,15 +321,15 @@ const App = function () {
       const worldPosition = getWorldPositionFromScreenPosition(e.clientX, e.clientY);
 
       pointerTween && pointerTween.kill();
-      pointerTween = gsap.to(pointMaterial.uniforms.u_mouse.value, 0.7, { x: worldPosition.x, y: worldPosition.y, z: worldPosition.z, ease: 'quart.out', onUpdate: followMouseSphere });
+      pointerTween = gsap.to(pointMaterial.uniforms.u_pointer.value, 0.7, { x: worldPosition.x, y: worldPosition.y, z: worldPosition.z, ease: 'quart.out', onUpdate: followMouseSphere });
 
       pointerScaleTween && pointerScaleTween.kill();
-      pointerScaleTween = gsap.to(pointMaterial.uniforms.u_mouseRadius, 0.3, {
+      pointerScaleTween = gsap.to(pointMaterial.uniforms.u_pointerRadius, 0.3, {
         value: 2,
         ease: 'quart.out',
         onUpdate: followMouseSphere,
         onComplete: () => {
-          pointerScaleTween = gsap.to(pointMaterial.uniforms.u_mouseRadius, 1.5, { value: 1, ease: 'quad.out', onUpdate: followMouseSphere });
+          pointerScaleTween = gsap.to(pointMaterial.uniforms.u_pointerRadius, 1.5, { value: 1, ease: 'quad.out', onUpdate: followMouseSphere });
         },
       });
 

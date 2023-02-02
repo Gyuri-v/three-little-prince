@@ -1,4 +1,4 @@
-uniform sampler2D u_pointTexture;
+// uniform sampler2D u_pointTexture; // 텍스쳐 전달 안해줌
 
 varying vec4 v_color;
 
@@ -22,6 +22,6 @@ void main() {
   // vec4 color = mix(vec4(0.0), v_color, strength);
   // gl_FragColor = color;
 
-  // 4. 그냥 
+  // 4. 그냥 보라색
   // gl_FragColor = vec4(0.5, 0.0, 1.0, 1.0);
 }
