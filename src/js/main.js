@@ -5,6 +5,8 @@ import gsap from 'gsap';
 
 import vertexShader from '../shader/vertex.glsl';
 import fragmentShader from '../shader/fragment.glsl';
+import vertexShaderBg from '../shader/bg_vertex.glsl';
+import fragmentShaderBg from '../shader/bg_fragment.glsl';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler';
 import { getSphericalRandomPosition, getWorldPositionFromScreenPosition, nearestPowerOfTwoCeil } from './functions';
 
@@ -18,7 +20,7 @@ const App = function () {
   let numModels = 0;
   let numLoadedModels = 0;
   let numMaxParticles = 0;
-  let pointMaterial;
+  let pointMaterial, backgroundMaterial;
   let timeline;
 
   const PI = Math.PI;
@@ -28,8 +30,10 @@ const App = function () {
   let $canvas;
 
   const particleGroup = new THREE.Group();
+  const particleMouseGroup = new THREE.Group();
   const particleInnerGroup = new THREE.Group();
-  particleGroup.add(particleInnerGroup);
+  particleMouseGroup.add(particleInnerGroup);
+  particleGroup.add(particleMouseGroup);
 
   const init = function () {
     // Window
@@ -122,14 +126,14 @@ const App = function () {
         setting: (geometry) => {
           geometry.rotateY(-0.9);
           geometry.scale(0.45, 0.45, 0.45);
-          geometry.translate(2, -5, 0);
+          geometry.translate(0, -5, 0);
         },
       },
       {
         name: 'escenaRey',
         counts: 5,
         setting: (geometry) => {
-          geometry.translate(0, -6, 0);
+          geometry.translate(2, -6, 0);
         },
       },
       {
@@ -137,6 +141,13 @@ const App = function () {
         setting: (geometry) => {
           geometry.scale(0.4, 0.4, 0.4);
           geometry.translate(0, 1, 0);
+        },
+      },
+      {
+        name: 'stars',
+        setting: (geometry) => {
+          geometry.scale(1, 1, 1);
+          geometry.translate(0, -4, -2);
         },
       },
     ];
@@ -193,12 +204,26 @@ const App = function () {
       vertexColors: true,
     });
 
+    backgroundMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        u_positions: { value: null },
+        u_transition: { value: 0 },
+        u_time: { value: 0 },
+      },
+      vertexShader: vertexShaderBg,
+      fragmentShader: fragmentShaderBg,
+      blending: THREE.AdditiveBlending,
+      depthTest: false,
+      transparent: true,
+      vertexColors: true,
+    });
+
     // -- Geometry
     const geometry = new THREE.BufferGeometry();
     const textureSize = nearestPowerOfTwoCeil(Math.sqrt(numMaxParticles));
     const textureArraySize = textureSize * textureSize * 4;
-    const colorInside = new THREE.Color('#a6afc8');
-    const colorOutside = new THREE.Color('#1b3984');
+    const colorInside = new THREE.Color('#84c8ff');
+    const colorOutside = new THREE.Color('#ffbc26');
 
     // positions & colors
     const positions = new Float32Array(textureSize * textureSize * 3);
@@ -211,7 +236,8 @@ const App = function () {
     models.forEach((info, index) => {
       // positions
       const positions = new Float32Array(textureArraySize);
-      for (let values = info.positionsArray, i = 0, j = 0, randomPosition; i < textureArraySize; i += 4, j += 3) {
+      const positionsCount = info.name === 'stars' ? info.positionsArray.length : textureArraySize;
+      for (let values = info.positionsArray, i = 0, j = 0, randomPosition; i < positionsCount; i += 4, j += 3) {
         if (!info.positionsArray[j] || !info.positionsArray[j + 1] || !info.positionsArray[j + 2]) {
           randomPosition = getSphericalRandomPosition(100);
         }
@@ -243,6 +269,12 @@ const App = function () {
       info.textureColors.magFilter = THREE.NearestFilter;
       info.textureColors.needsUpdate = true;
       delete info.colorsArray;
+
+      if (info.name === 'stars') {
+        backgroundMaterial.uniforms.u_positions.value = info.texturePositions;
+        const mesh = new THREE.Points(geometry, backgroundMaterial);
+        particleMouseGroup.add(mesh);
+      }
     });
 
     pointMaterial.uniforms.u_positions1.value = models[0].texturePositions;
@@ -303,25 +335,13 @@ const App = function () {
     let mouseSphere, followMouseSphere;
     let pointerTween;
     let pointerScaleTween;
-    let particleInnerTween;
+    let particleMouseTween;
 
-    if (DEBUG) {
-      mouseSphere = new THREE.Mesh(new THREE.SphereGeometry(pointMaterial.uniforms.u_pointerRadius.value, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true }));
-      scene.add(mouseSphere);
-
-      followMouseSphere = function () {
-        mouseSphere.position.copy(pointMaterial.uniforms.u_pointer.value);
-        mouseSphere.scale.set(1, 1, 1);
-        mouseSphere.scale.multiplyScalar(pointMaterial.uniforms.u_pointerRadius.value);
-        render();
-      };
-    }
-
-    document.documentElement.addEventListener('mousemove', function (e) {
+    document.addEventListener('mousemove', function (e) {
       const worldPosition = getWorldPositionFromScreenPosition(e.clientX, e.clientY);
 
       pointerTween && pointerTween.kill();
-      pointerTween = gsap.to(pointMaterial.uniforms.u_pointer.value, 0.7, { x: worldPosition.x, y: worldPosition.y, z: worldPosition.z, ease: 'quart.out', onUpdate: followMouseSphere });
+      pointerTween = gsap.to(pointMaterial.uniforms.u_pointer.value, 0.7, { x: worldPosition.x, y: worldPosition.y, z: worldPosition.z, ease: 'quart.out' });
 
       pointerScaleTween && pointerScaleTween.kill();
       pointerScaleTween = gsap.to(pointMaterial.uniforms.u_pointerRadius, 0.3, {
@@ -329,12 +349,12 @@ const App = function () {
         ease: 'quart.out',
         onUpdate: followMouseSphere,
         onComplete: () => {
-          pointerScaleTween = gsap.to(pointMaterial.uniforms.u_pointerRadius, 1.5, { value: 1, ease: 'quad.out', onUpdate: followMouseSphere });
+          pointerScaleTween = gsap.to(pointMaterial.uniforms.u_pointerRadius, 1.5, { value: 1, ease: 'quad.out' });
         },
       });
 
-      particleInnerTween && particleInnerTween.kill();
-      particleInnerTween = gsap.to(particleGroup.rotation, 2, { x: THREE.MathUtils.degToRad(worldPosition.y * -1.5), y: THREE.MathUtils.degToRad(worldPosition.x * -1), ease: 'quart.out' });
+      particleMouseTween && particleMouseTween.kill();
+      particleMouseTween = gsap.to(particleMouseGroup.rotation, 2, { x: THREE.MathUtils.degToRad(worldPosition.y * -1.5), y: THREE.MathUtils.degToRad(worldPosition.x * -1), ease: 'quart.out' });
     });
   };
 
