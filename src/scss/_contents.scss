@@ -13,15 +13,53 @@
 }
 
 .container {
-  section {
-    height: 200vh;
-  }
-
   canvas {
     position: fixed;
     top: 0;
     left: 0;
+    z-index: -1;
     width: 100%;
     height: 100vh;
+  }
+
+  section {
+    position: relative;
+    height: 200vh;
+    border: 1px solid red;
+
+    .sticky-wrap {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: sticky;
+      width: 100%;
+      height: 100vh;
+      top: 0;
+      border: 1px solid blue;
+    }
+  }
+
+  .title-wrap {
+    position: absolute;
+    top: 100px;
+    width: 100%;
+    text-align: center;
+    .title {
+      font-size: 70px;
+      font-weight: 400;
+      color: #fff;
+    }
+  }
+
+  .text-wrap {
+    width: 90%;
+    .text {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: 1px;
+      color: #fff;
+    }
   }
 }

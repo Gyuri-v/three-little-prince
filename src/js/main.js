@@ -236,7 +236,7 @@ const App = function () {
     models.forEach((info, index) => {
       // positions
       const positions = new Float32Array(textureArraySize);
-      const positionsCount = info.name === 'stars' ? info.positionsArray.length : textureArraySize;
+      const positionsCount = info.name === 'stars' ? info.positionsArray.length + 200000 : textureArraySize;
       for (let values = info.positionsArray, i = 0, j = 0, randomPosition; i < positionsCount; i += 4, j += 3) {
         if (!info.positionsArray[j] || !info.positionsArray[j + 1] || !info.positionsArray[j + 2]) {
           randomPosition = getSphericalRandomPosition(100);
