@@ -156,9 +156,9 @@ const App = function () {
 
     // 모델 로딩
     const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('./resources/draco/');
+    dracoLoader.setDecoderPath('resources/draco/');
     models.forEach((info, index) => {
-      dracoLoader.load(`./resources/models/${info.name}.drc`, (geometry) => {
+      dracoLoader.load(`resources/models/${info.name}.drc`, (geometry) => {
         info.setting && info.setting(geometry);
 
         const samplerCount = models[index].counts ? models[index].counts : (1 + Math.random() * 3).toFixed(2);

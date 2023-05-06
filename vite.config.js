@@ -3,9 +3,11 @@ import { resolve } from 'path';
 import glsl from 'vite-plugin-glsl';
 
 export default defineConfig({
+  base: "/three-little-prince/",
   plugins: [glsl()],
   build: {
     rollupOptions: {
+      chunkSizeWarningLimit: 1600,
       input: {
         main: resolve(__dirname, 'index.html'),
         // sub: resolve(__dirname, 'sub/index.html'),
